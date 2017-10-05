@@ -1,4 +1,4 @@
-# Bayesian Change Point Analysis of Trump's Approval
+# Bayesian Change Point Analysis of USA National Poll data
 
 This app automatically downloads data from the [Huffpost poll aggregator](http://elections.huffingtonpost.com/pollster/trump-job-approval). It then performs a Bayesian change-point analysis of that data to identify key periods when public opinion shifted
 
@@ -22,11 +22,11 @@ Next, you will need to install a package called 'shiny' to run it locally. You c
 
 It will ask you to choose a download mirror (you can choose anyone, the result is the same). Then, to run the software:
 
->shiny::runGitHub("leedrake5/trumpChangePoint")
+>shiny::runGitHub("leedrake5/pollChangePoint")
 
 The first time it runs, it may take some time to download the supporting software. After that, you should be good to go. If you'd like to download a copy and run it offline, you can instead download it from GitHub (https://github.com/leedrake5/CloudCal) and then run it locally:
 
->shiny::runApp("your/computer/directory/trumpChangePoint")
+>shiny::runApp("your/computer/directory/pollChangePoint")
 
 
 ## How to cite this software

@@ -25,11 +25,17 @@ tags$p("Click 'Go' to start analysis"),
 
 tags$hr(),
 
+sliderInput("prior", label="Prior Probability of a change-point", min=0.001, max=1, value=0.001),
+tags$p("A smaller prior is better for big data sets"),
+
+tags$hr(),
 
 uiOutput('selectPeople'),
 uiOutput('selectPollster'),
 uiOutput('selectMode'),
-uiOutput('selectPartisan')
+uiOutput('selectPartisan'),
+tags$p("Choose your inputs, but keep in mind live telephone interviews are more reliable")
+
 
 
 

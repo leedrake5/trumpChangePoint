@@ -95,46 +95,57 @@ trumpBCP <- reactive({
     input$trumpbayes
 
  
-    isolate(trump <- dataSubset())
+    isolate(approval.table <- dataSubset())
     
     
+    approval.table$Date <- as.Date(approval.table$end_date, format="%Y-%m-%d")
     
-    trump$Date <- as.Date(trump$end_date, format="%Y-%m-%d")
-
-    trump.approve.bc <- bcp(y=trump$Approve, burnin=2000, mcmc=10000, w0=mean(trump$margin_of_error, na.rm=TRUE)/100, p0=0.001)
+    approve.bc <- bcp(y=approval.table$Approve, burnin=2000, mcmc=10000, w0=mean(approval.table$margin_of_error, na.rm=TRUE)/100, p0=input$prior)
     
-    trump.approve.posterior.mean <- trump.approve.bc$posterior.mean
-    trump.approve.posterior.prob <- trump.approve.bc$posterior.prob
-    trump.approve.posterior.var <- trump.approve.bc$posterior.var
-    trump.approve.posterior.sd <- sqrt(trump.approve.posterior.var)
+    approve.posterior.mean <- approve.bc$posterior.mean
+    approve.posterior.prob <- approve.bc$posterior.prob
+    approve.posterior.var <- approve.bc$posterior.var
+    approve.posterior.sd <- sqrt(approve.posterior.var)
     
-    trump.approve.bayes.dataframe <- data.frame(trump$Date, trump$Approve, trump.approve.posterior.mean, trump.approve.posterior.prob, trump.approve.posterior.sd)
-    colnames(trump.approve.bayes.dataframe) <- c("Date", "Approve", "PosteriorMean", "PosteriorProb", "PosteriorSD")
+    approve.bayes.dataframe <- data.frame(approval.table$Date, approval.table$Approve, approve.posterior.mean, approve.posterior.prob, approve.posterior.sd)
+    colnames(approve.bayes.dataframe) <- c("Date", "Approve", "PosteriorMean", "PosteriorProb", "PosteriorSD")
     
-   trump.disapprove.bc <- bcp(y=trump$Disapprove,  burnin=2000, mcmc=10000,  w0=mean(trump$margin_of_error, na.rm=TRUE)/100, p0=0.001)
-    trump.disapprove.posterior.mean <- trump.disapprove.bc$posterior.mean
-    trump.disapprove.posterior.prob <- trump.disapprove.bc$posterior.prob
-    trump.disapprove.posterior.var <- trump.disapprove.bc$posterior.var
-    trump.disapprove.posterior.sd <- sqrt(trump.disapprove.posterior.var)
+    notsure.frame <- approval.table[complete.cases(approval.table["Undecided"]),]
     
-    trump.disapprove.bayes.dataframe <- data.frame(trump$Date, trump$Disapprove, trump.disapprove.posterior.mean, trump.disapprove.posterior.prob, trump.disapprove.posterior.sd)
-    colnames(trump.approve.bayes.dataframe) <- c("Date", "Disapprove", "PosteriorMean", "PosteriorProb", "PosteriorSD")
+    notsure.bc <- bcp(y=notsure.frame$Undecided,  burnin=2000, mcmc=10000,  w0=mean(notsure.frame$margin_of_error, na.rm=TRUE)/100, p0=input$prior)
+    notsure.posterior.mean <- notsure.bc$posterior.mean
+    notsure.posterior.prob <- notsure.bc$posterior.prob
+    notsure.posterior.var <- notsure.bc$posterior.var
+    notsure.posterior.sd <- sqrt(notsure.posterior.var)
     
-    trump.total.frame <- data.frame(trump$Date,
-    c(trump$Disapprove, trump$Approve),
-    c(trump.disapprove.posterior.mean, trump.approve.posterior.mean),
-    c(trump.disapprove.posterior.prob, trump.approve.posterior.prob),
-    c(trump.disapprove.posterior.sd, trump.approve.posterior.sd),
-    c(rep("Disapproval", length(trump$Disapprove)),rep("Approval", length(trump$Approve))),
-    trump$survey_house,
-    trump$mode
+    notsure.bayes.dataframe <- data.frame(notsure.frame$Date, notsure.frame$Undecided, notsure.posterior.mean, notsure.posterior.prob, notsure.posterior.sd)
+    colnames(notsure.bayes.dataframe) <- c("Date", "Undecided", "PosteriorMean", "PosteriorProb", "PosteriorSD")
+    
+    disapprove.bc <- bcp(y=approval.table$Disapprove,  burnin=2000, mcmc=10000,  w0=mean(approval.table$margin_of_error, na.rm=TRUE)/100, p0=input$prior)
+    disapprove.posterior.mean <- disapprove.bc$posterior.mean
+    disapprove.posterior.prob <- disapprove.bc$posterior.prob
+    disapprove.posterior.var <- disapprove.bc$posterior.var
+    disapprove.posterior.sd <- sqrt(disapprove.posterior.var)
+    
+    disapprove.bayes.dataframe <- data.frame(approval.table$Date, approval.table$Disapprove, disapprove.posterior.mean, disapprove.posterior.prob, disapprove.posterior.sd)
+    colnames(disapprove.bayes.dataframe) <- c("Date", "Disapprove", "PosteriorMean", "PosteriorProb", "PosteriorSD")
+    
+    total.frame <- data.frame(
+    c(approval.table$Date, notsure.frame$Date, approval.table$Date),
+    c(approval.table$Disapprove, notsure.frame$Undecided, approval.table$Approve),
+    c(disapprove.posterior.mean, notsure.posterior.mean, approve.posterior.mean),
+    c(disapprove.posterior.prob, notsure.posterior.prob, approve.posterior.prob),
+    c(disapprove.posterior.sd, notsure.posterior.sd, approve.posterior.sd),
+    c(rep("3. Disapprove", length(approval.table$Disapprove)), rep("2. Undecided", length(notsure.frame$Undecided)), rep("1. Approve", length(approval.table$Approve))),
+    c(approval.table$survey_house, notsure.frame$survey_house, approval.table$survey_house),
+    c(approval.table$mode, notsure.frame$mode, approval.table$mode)
     )
-    colnames(trump.total.frame) <- c("Date", "Rating", "PosteriorMean", "PosteriorProb", "PosteriorSd", "Type", "Pollster", "Mode")
+    colnames(total.frame) <- c("Date", "Rating", "PosteriorMean", "PosteriorProb", "PosteriorSd", "Type", "Pollster", "Mode")
     
-    trump.total.frame$Hodder <- Hodder(trump.total.frame$PosteriorMean)
-    trump.total.frame$PosteriorProb <- trump.total.frame$PosteriorProb*(trump.total.frame$Hodder/abs(trump.total.frame$Hodder))
+    total.frame$Hodder <- Hodder(total.frame$PosteriorMean)
+    total.frame$PosteriorProb <- total.frame$PosteriorProb*(total.frame$Hodder/abs(total.frame$Hodder))
     
-    trump.total.frame
+    total.frame
     
     
     

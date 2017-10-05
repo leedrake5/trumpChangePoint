@@ -1,6 +1,6 @@
-#list.of.packages <- c("bcp", "dplyr",  "ggplot2", "shiny", "DT", "shinythemes", "gridExtra")
-#new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
-#if(length(new.packages)) install.packages(new.packages)
+list.of.packages <- c("bcp", "dplyr",  "ggplot2", "shiny", "DT", "shinythemes", "gridExtra")
+new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+if(length(new.packages)) install.packages(new.packages)
 
 library(ggplot2)
 library(bcp)
@@ -25,7 +25,7 @@ ggplotColours <- function(n = 6, h = c(0, 360) + 15){
     hcl(h = (seq(h[1], h[2], length = n)), c = 100, l = 65)
 }
 
-cols <- scales::hue_pal()(2)
+cols <- scales::hue_pal()(3)
 
 
 Hodder <- function(y)
