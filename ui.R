@@ -10,7 +10,10 @@ div(class="outer",
 sidebarLayout(
 sidebarPanel(
 
-
+tags$style(type="text/css",
+".shiny-output-error { visibility: hidden; }",
+".shiny-output-error:before { visibility: hidden; }"
+),
 
 actionButton("trumpbayes", label = "Go"),
 downloadButton('downloadtrumpplot', label="Plot"),
