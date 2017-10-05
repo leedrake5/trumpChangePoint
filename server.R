@@ -131,6 +131,9 @@ trumpBCP <- reactive({
     )
     colnames(trump.total.frame) <- c("Date", "Rating", "PosteriorMean", "PosteriorProb", "PosteriorSd", "Type", "Pollster", "Mode")
     
+    trump.total.frame$Hodder <- Hodder(trump.total.frame$PosteriorMean)
+    trump.total.frame$PosteriorProb <- trump.total.frame$PosteriorProb*(trump.total.frame$Hodder/abs(trump.total.frame$Hodder))
+    
     trump.total.frame
     
     
@@ -167,7 +170,7 @@ posteriorProbPlot <- reactive({
     geom_line(aes(colour=Type))+
     theme_bw() +
     scale_x_date("Date") +
-    scale_y_continuous("Probability", limits = c(0, 1), breaks=seq(0, 1, 0.25)) +
+    scale_y_continuous("Probability", limits = c(-1, 1), breaks=seq(-1, 1, 0.25)) +
     scale_color_manual(values = rev(cols))
 })
 
